@@ -82,6 +82,8 @@ out
 .nuxt
 dist
 .output
+out/
+.vite/
 
 # Gatsby files
 .cache/

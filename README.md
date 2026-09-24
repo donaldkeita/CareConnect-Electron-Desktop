@@ -1,2 +1,60 @@
-# CareConnect-Electron-Desktop
-Desktop implementation of CareConnect application
+# CareConnect Electron Desktop
+
+Desktop implementation of the CareConnect application, scaffolded with Electron,
+React, TypeScript, Vite, and Electron Forge.
+
+The current application is intentionally limited to a secure, runnable shell.
+Product design, navigation, persistence, and CareConnect features will be added
+later.
+
+## Prerequisites
+
+- A currently supported Node.js LTS release
+- npm
+
+## Development
+
+```bash
+npm install
+npm start
+```
+
+## Validation
+
+```bash
+npm run typecheck
+npm test
+```
+
+## Packaging
+
+Create an unpacked application:
+
+```bash
+npm run package
+```
+
+Create a platform-specific distributable:
+
+```bash
+npm run make
+```
+
+Generated artifacts are written to `out/`.
+
+## Project structure
+
+```text
+assets/              Packaging resources such as application icons
+docs/                Architecture and contributor documentation
+src/main/            Electron main process and privileged IPC handlers
+src/preload/         Context-isolated bridge exposed to the renderer
+src/renderer/        React application running in the browser context
+src/shared/          Types and contracts shared across process boundaries
+tests/e2e/           Future packaged-application end-to-end tests
+tests/unit/          Future isolated unit tests
+```
+
+The renderer must not import Electron or Node.js APIs directly. Privileged
+operations belong in the main process and must be exposed through a narrow,
+typed preload API.
