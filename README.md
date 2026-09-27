@@ -63,3 +63,4 @@ typed preload API.
 
 - [Architecture](docs/architecture.md)
 - [Accessibility plan](docs/accessibility-plan.md)
+- [Keyboard shortcuts](docs/keyboard-shortcuts.md)
