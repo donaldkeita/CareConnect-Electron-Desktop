@@ -58,3 +58,8 @@ tests/unit/          Future isolated unit tests
 The renderer must not import Electron or Node.js APIs directly. Privileged
 operations belong in the main process and must be exposed through a narrow,
 typed preload API.
+
+## Project documentation
+
+- [Architecture](docs/architecture.md)
+- [Accessibility plan](docs/accessibility-plan.md)
