@@ -3,9 +3,12 @@
 Desktop implementation of the CareConnect application, scaffolded with Electron,
 React, TypeScript, Vite, and Electron Forge.
 
-The current application is intentionally limited to a secure, runnable shell.
-Product design, navigation, persistence, and CareConnect features will be added
-later.
+The current application includes the CareConnect desktop shell, accessible
+navigation, overview, appointments, medications, and messages views. Window
+size, position, and maximized state are restored between sessions. Appointments,
+medications, messages, search, notifications, dialogs, and preferences use
+interactive local demo data that persists between sessions. These prototype
+workflows will be connected to application services in later milestones.
 
 ## Prerequisites
 
