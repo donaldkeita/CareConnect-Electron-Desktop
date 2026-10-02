@@ -1,14 +1,23 @@
 import path from "node:path";
-import { app, BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow, ipcMain, screen } from "electron";
 import { IPC_CHANNELS } from "../shared/ipc";
+import { loadWindowState, trackWindowState } from "./window-state";
 
 const createMainWindow = (): BrowserWindow => {
+  const stateFile = path.join(app.getPath("userData"), "window-state.json");
+  const savedState = loadWindowState(
+    stateFile,
+    screen.getAllDisplays().map((display) => display.workArea),
+  );
   const window = new BrowserWindow({
-    width: 1200,
-    height: 800,
+    x: savedState.x,
+    y: savedState.y,
+    width: savedState.width,
+    height: savedState.height,
     minWidth: 800,
     minHeight: 600,
     show: false,
+    backgroundColor: "#f2f6f8",
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
@@ -16,6 +25,9 @@ const createMainWindow = (): BrowserWindow => {
       sandbox: true,
     },
   });
+
+  trackWindowState(window, stateFile);
+  if (savedState.isMaximized) window.maximize();
 
   window.once("ready-to-show", () => window.show());
 
