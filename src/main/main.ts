@@ -1,6 +1,6 @@
 import path from "node:path";
 import { app, BrowserWindow, ipcMain, screen } from "electron";
-import { IPC_CHANNELS } from "../shared/ipc";
+import { registerIpcHandlers } from "./ipc-handlers";
 import { loadWindowState, trackWindowState } from "./window-state";
 
 const createMainWindow = (): BrowserWindow => {
@@ -43,7 +43,7 @@ const createMainWindow = (): BrowserWindow => {
 };
 
 app.whenReady().then(() => {
-  ipcMain.handle(IPC_CHANNELS.getAppVersion, () => app.getVersion());
+  registerIpcHandlers(ipcMain, () => app.getVersion());
   createMainWindow();
 
   app.on("activate", () => {
