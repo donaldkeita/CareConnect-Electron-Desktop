@@ -8,6 +8,10 @@ function App() {
 
   return (
     <div className="app">
+      <a className="skip-link" href="#main-content">
+        Skip to main content
+      </a>
+
       <aside className="sidebar">
         <div>
           <h1>CareConnect</h1>
@@ -17,6 +21,7 @@ function App() {
             <button
               className={screen === "home" ? "nav-item active" : "nav-item"}
               onClick={() => setScreen("home")}
+              aria-current={screen === "home" ? "page" : undefined}
             >
               Home
             </button>
@@ -24,6 +29,7 @@ function App() {
             <button
               className={screen === "appointments" ? "nav-item active" : "nav-item"}
               onClick={() => setScreen("appointments")}
+              aria-current={screen === "appointments" ? "page" : undefined}
             >
               Appointments
             </button>
@@ -36,13 +42,13 @@ function App() {
         <button className="nav-item">Settings</button>
       </aside>
 
-      <main className="main-content">
+      <main className="main-content" id="main-content">
         <header className="toolbar">
           <strong>{screen === "home" ? "Home" : "Appointments"}</strong>
 
           <div className="toolbar-actions">
-            <button>Search</button>
-            <button>Notifications</button>
+            <button aria-label="Search CareConnect">Search</button>
+            <button aria-label="View notifications">Notifications</button>
           </div>
         </header>
 
@@ -61,7 +67,11 @@ function App() {
   );
 }
 
-function HomeScreen({ onAppointments }: { onAppointments: () => void }) {
+function HomeScreen({
+  onAppointments,
+}: {
+  onAppointments: () => void;
+}) {
   return (
     <section className="content">
       <div className="page-heading">
@@ -122,6 +132,7 @@ function AppointmentsScreen() {
             <p>Dr. Sarah Williams</p>
             <p>Rockville Medical Center</p>
           </div>
+
           <button>View Details</button>
         </div>
 
@@ -131,6 +142,7 @@ function AppointmentsScreen() {
             <p>Michael Chen, PT</p>
             <p>CareConnect Rehabilitation Center</p>
           </div>
+
           <button>View Details</button>
         </div>
       </div>
