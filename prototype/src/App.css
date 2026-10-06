@@ -165,3 +165,51 @@ button:focus-visible {
   display: flex;
   justify-content: space-between;
 }
+
+a:focus-visible,
+button:focus-visible {
+  outline: 3px solid #2563eb;
+  outline-offset: 3px;
+}
+
+.skip-link {
+  position: absolute;
+  top: -50px;
+  left: 10px;
+  background: white;
+  color: #173b68;
+  padding: 10px 16px;
+  z-index: 1000;
+  border: 2px solid #173b68;
+  border-radius: 4px;
+}
+
+.skip-link:focus {
+  top: 10px;
+}
+
+@media (prefers-contrast: more) {
+  .card,
+  .toolbar,
+  .status-bar {
+    border-width: 2px;
+    border-color: #000;
+  }
+
+  .nav-item.active {
+    outline: 2px solid white;
+  }
+
+  button {
+    border-width: 2px;
+  }
+}
+
+@media (forced-colors: active) {
+  button,
+  .card,
+  .toolbar,
+  .sidebar {
+    forced-color-adjust: auto;
+  }
+}
