@@ -14,3 +14,14 @@ createRoot(rootElement).render(
     <App />
   </StrictMode>,
 );
+
+if (import.meta.env.DEV) {
+  void import("./accessibility")
+    .then(({ runAxeScan }) => {
+      window.runAxeScan = runAxeScan;
+      return runAxeScan();
+    })
+    .catch((error: unknown) => {
+      console.error("[axe] Accessibility scan failed:", error);
+    });
+}
