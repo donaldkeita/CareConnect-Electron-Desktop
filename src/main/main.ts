@@ -30,6 +30,11 @@ const createMainWindow = (): BrowserWindow => {
   if (savedState.isMaximized) window.maximize();
 
   window.once("ready-to-show", () => window.show());
+  if (!app.isPackaged) {
+    window.webContents.once("did-finish-load", () => {
+      window.webContents.openDevTools();
+    });
+  }
 
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     void window.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
