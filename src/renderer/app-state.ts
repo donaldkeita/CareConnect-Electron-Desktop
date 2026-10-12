@@ -22,6 +22,7 @@ export type AppAction =
   | { type: "update-appointment"; appointment: Appointment }
   | { type: "cancel-appointment"; id: number }
   | { type: "add-medication"; medication: Medication }
+  | { type: "toggle-medication-dose"; id: number; doseKey: string }
   | { type: "send-message"; message: MessageThread }
   | { type: "reply-message"; id: number; body: string }
   | { type: "select-message"; id: number }
@@ -47,6 +48,12 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     case "update-appointment": return { ...state, appointments: state.appointments.map((item) => item.id === action.appointment.id ? action.appointment : item), page: "appointments" };
     case "cancel-appointment": return { ...state, appointments: state.appointments.map((item) => item.id === action.id ? { ...item, status: "Cancelled" } : item) };
     case "add-medication": return { ...state, medications: [...state.medications, action.medication], page: "medications" };
+    case "toggle-medication-dose": return { ...state, medications: state.medications.map((item) => {
+      if (item.id !== action.id) return item;
+      const doses = item.takenDoses ?? [];
+      const takenDoses = doses.includes(action.doseKey) ? doses.filter((key) => key !== action.doseKey) : [...doses, action.doseKey];
+      return { ...item, takenDoses, status: takenDoses.length ? "On track" : item.status };
+    }) };
     case "send-message": return { ...state, messages: [action.message, ...state.messages], page: "messages" };
     case "reply-message": return { ...state, messages: state.messages.map((item) => item.id === action.id ? { ...item, body: `${item.body}\n\nJordan: ${action.body}`, preview: action.body, time: "Just now", unread: false } : item) };
     case "select-message": return { ...state, messages: state.messages.map((item) => item.id === action.id ? { ...item, unread: false } : item) };
@@ -63,8 +70,24 @@ export function loadAppState(): AppState {
     if (!saved) return initialState;
     const parsed = JSON.parse(saved) as Partial<AppState>;
     if (!Array.isArray(parsed.appointments) || !Array.isArray(parsed.medications) || !Array.isArray(parsed.messages)) return initialState;
-    return { ...initialState, ...parsed, page: "overview" };
+    const restored = { ...initialState, ...parsed, page: "overview" } as AppState;
+    restored.medications = restored.medications.map(normalizeMedication);
+    return restored;
   } catch { return initialState; }
+}
+
+function normalizeMedication(medication: Medication): Medication {
+  if (medication.reminderTimes?.length) return { ...medication, takenDoses: medication.takenDoses ?? [] };
+  const [frequency = "Once daily", times = "8:00 AM"] = medication.schedule.split(" · ");
+  return { ...medication, frequency, reminderTimes: times.split(", ").map(parseDisplayTime), takenDoses: medication.takenDoses ?? [] };
+}
+
+function parseDisplayTime(value: string) {
+  const match = value.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  if (!match) return "08:00";
+  let hour = Number(match[1]) % 12;
+  if (match[3].toUpperCase() === "PM") hour += 12;
+  return `${String(hour).padStart(2, "0")}:${match[2]}`;
 }
 
 export function saveAppState(state: AppState) {

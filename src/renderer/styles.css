@@ -160,6 +160,12 @@ td small { color:var(--muted); }
 .form-field textarea,.form-section textarea { min-height:78px; resize:vertical; }
 .field-error { color:#b42318; }
 .appointment-datetime { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; }
+.reminder-field { border:0; padding:0; margin:0; }
+.reminder-field>legend { margin-bottom:.4rem; font-size:.68rem; font-weight:700; }
+.time-picker,.dose-actions { display:flex; align-items:center; gap:.35rem; }
+.time-picker select { min-width:8rem; }
+.dose-actions { align-items:stretch; flex-direction:column; }
+.dose-actions button { white-space:nowrap; }
 .field-hint { margin:-.45rem 0 0; color:var(--muted); font-size:.65rem; }
 .help-list { display:grid; gap:.7rem; }
 .help-list p { display:flex; align-items:center; gap:1rem; margin:0; }
