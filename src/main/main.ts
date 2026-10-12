@@ -1,5 +1,6 @@
 import path from "node:path";
-import { app, BrowserWindow, ipcMain, screen } from "electron";
+import { app, BrowserWindow, ipcMain, Menu, screen } from "electron";
+import { createApplicationMenuTemplate } from "./application-menu";
 import { registerIpcHandlers } from "./ipc-handlers";
 import { loadWindowState, trackWindowState } from "./window-state";
 
@@ -49,6 +50,7 @@ const createMainWindow = (): BrowserWindow => {
 
 app.whenReady().then(() => {
   registerIpcHandlers(ipcMain, () => app.getVersion());
+  Menu.setApplicationMenu(Menu.buildFromTemplate(createApplicationMenuTemplate()));
   createMainWindow();
 
   app.on("activate", () => {

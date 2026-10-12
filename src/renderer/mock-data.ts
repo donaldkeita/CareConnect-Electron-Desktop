@@ -6,12 +6,12 @@ export const appointments: Appointment[] = [
   { id: 3, doctor: "Dr. Priya Nair", specialty: "Endocrinology", date: "Oct 4, 2026 · 1:15 PM", dateValue: "2026-10-04", timeValue: "13:15", location: "Westfield Health Pavilion, Room 114", type: "In person", status: "Upcoming" },
   { id: 4, doctor: "Dr. Sarah Chen", specialty: "Primary Care", date: "Aug 12, 2026 · 10:00 AM", dateValue: "2026-08-12", timeValue: "10:00", location: "Northside Medical Center", type: "In person", status: "Past" },
 ];
-export interface Medication { id: number; name: string; dose: string; schedule: string; prescriber: string; refill: string; status: "Missed" | "On track"; type?: string; pharmacy?: string; instructions?: string; }
+export interface Medication { id: number; name: string; dose: string; schedule: string; frequency?: string; reminderTimes?: string[]; takenDoses?: string[]; prescriber: string; refill: string; status: "Missed" | "On track"; type?: string; pharmacy?: string; instructions?: string; }
 export const medications: Medication[] = [
-  { id: 1, name: "Lisinopril", dose: "10 mg", schedule: "Once daily · 8:00 AM", prescriber: "Dr. Chen", refill: "Sep 14, 2026", status: "Missed" },
-  { id: 2, name: "Metformin", dose: "500 mg", schedule: "Twice daily · 8:00 AM, 8:00 PM", prescriber: "Dr. Nair", refill: "Sep 22, 2026", status: "Missed" },
-  { id: 3, name: "Atorvastatin", dose: "20 mg", schedule: "Once daily · 9:00 PM", prescriber: "Dr. Webb", refill: "Oct 3, 2026", status: "On track" },
-  { id: 4, name: "Vitamin D3", dose: "2,000 IU", schedule: "Once daily · 8:00 AM", prescriber: "Dr. Chen", refill: "Nov 1, 2026", status: "On track" },
+  { id: 1, name: "Lisinopril", dose: "10 mg", schedule: "Once daily · 8:00 AM", frequency: "Once daily", reminderTimes: ["08:00"], takenDoses: [], prescriber: "Dr. Chen", refill: "Sep 14, 2026", status: "Missed" },
+  { id: 2, name: "Metformin", dose: "500 mg", schedule: "Twice daily · 8:00 AM, 8:00 PM", frequency: "Twice daily", reminderTimes: ["08:00", "20:00"], takenDoses: [], prescriber: "Dr. Nair", refill: "Sep 22, 2026", status: "Missed" },
+  { id: 3, name: "Atorvastatin", dose: "20 mg", schedule: "Once daily · 9:00 PM", frequency: "Once daily", reminderTimes: ["21:00"], takenDoses: [], prescriber: "Dr. Webb", refill: "Oct 3, 2026", status: "On track" },
+  { id: 4, name: "Vitamin D3", dose: "2,000 IU", schedule: "Once daily · 8:00 AM", frequency: "Once daily", reminderTimes: ["08:00"], takenDoses: [], prescriber: "Dr. Chen", refill: "Nov 1, 2026", status: "On track" },
 ];
 export interface MessageThread { id: number; initials: string; sender: string; subject: string; preview: string; time: string; unread: boolean; body: string; }
 export const messages: MessageThread[] = [
