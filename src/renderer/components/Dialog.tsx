@@ -5,10 +5,10 @@ export function Dialog({ open, title, description, children, actions, onClose, o
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => { const dialog = ref.current; if (!dialog) return; if (open && !dialog.open) dialog.showModal(); if (!open && dialog.open) dialog.close(); }, [open]);
   return (
-    <dialog ref={ref} className="app-dialog" aria-labelledby="dialog-title" aria-describedby={description ? "dialog-description" : undefined} onCancel={(event) => { event.preventDefault(); onClose(); }} onClose={onClose}>
+    <dialog ref={ref} className="app-dialog" aria-labelledby="dialog-title" aria-describedby={description ? "dialog-description" : undefined} onCancel={(event) => { event.preventDefault(); onClose(); }} onKeyDown={(event) => { if (event.key === "Escape") { event.preventDefault(); onClose(); } }} onClose={onClose}>
       <form method="dialog" onSubmit={onSubmit}>
         <header><div><h2 id="dialog-title">{title}</h2>{description && <p id="dialog-description">{description}</p>}</div><button className="icon-button" type="button" onClick={onClose} aria-label={`Close ${title}`} title={`Close ${title}`}><Icon name="close" /></button></header>
-        <div className="dialog-body">{children}</div><footer>{actions}</footer>
+        <div className="dialog-body" tabIndex={0} role="group" aria-labelledby="dialog-title">{children}</div><footer>{actions}</footer>
       </form>
     </dialog>
   );

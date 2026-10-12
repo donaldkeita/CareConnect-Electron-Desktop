@@ -93,12 +93,19 @@ describe("CareConnect app", () => {
 
   it("requests an appointment and shows the new visit", async () => {
     const user = userEvent.setup();
+    const appointmentDate = new Date();
+    appointmentDate.setDate(appointmentDate.getDate() + 1);
+    const preferredDate = [
+      appointmentDate.getFullYear(),
+      String(appointmentDate.getMonth() + 1).padStart(2, "0"),
+      String(appointmentDate.getDate()).padStart(2, "0"),
+    ].join("-");
     render(<App />);
 
     await user.click(screen.getByRole("button", { name: "New appointment" }));
     const dialog = screen.getByRole("dialog", { name: "Request an appointment" });
     await user.selectOptions(within(dialog).getByLabelText("Provider *"), "Dr. Priya Nair");
-    await user.type(within(dialog).getByLabelText("Preferred date *"), "2026-10-10");
+    await user.type(within(dialog).getByLabelText("Preferred date *"), preferredDate);
     await user.selectOptions(within(dialog).getByLabelText("Preferred time *"), "09:00");
     await user.click(within(dialog).getByRole("button", { name: "Submit request" }));
 

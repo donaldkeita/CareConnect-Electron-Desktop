@@ -105,6 +105,114 @@ See the [accessibility plan](docs/accessibility-plan.md) and
 [keyboard-shortcut design](docs/keyboard-shortcuts.md) for the full proposed
 acceptance criteria.
 
+## Color contrast (WCAG 2 AA)
+
+**Issue.** Chrome DevTools (Elements → Accessibility / CSS Overview) flagged
+low-contrast text on every screen. Per the
+[WebAIM contrast guidance](https://webaim.org/articles/contrast/), WCAG 2 AA
+requires at least 4.5:1 for normal text and 3:1 for large text and UI graphics.
+Muted gray text (`--muted` `#72889a`, about 3.4–3.7:1), the sidebar footer
+text, the blue eyebrow/link text (`#147ee5`, `#0878dc`), the orange accent
+(`#ec5428`, 3.6:1 against white for badges and the active step), table headers,
+the status bar, pill labels (visit/missed/on-track), form required markers,
+search placeholder/icon, and the stat-card chevrons all fell below the
+threshold.
+
+**Remediation** (all in `src/renderer/styles.css`):
+
+| Element | Before | After |
+|---|---|---|
+| `--muted` (subtext, hints, details, tabs, meta) | `#72889a` | `#4f6475` |
+| `--orange` (badge, active step) | `#ec5428` | `#c4310a` |
+| Search box text, table header, status bar, appointment details, progress steps | `#879aa9`, `#758b9a`, `#7a8f9d`, `#718a9c`, `#758a98` | `#566b7b` / `#4f6475` |
+| Sidebar footer on navy | `#7393a5` | `#9db8c6` |
+| Eyebrow, text buttons, soft icon, bullet | `#147ee5`, `#0878dc`, `#1686e8`, `#1887e7` | `#0a5fb0` |
+| Stat-card chevron | `#9ab0bd` | `#4f6475` |
+| Visit pill / telehealth / missed / on-track | `#26936c`, `#8058d4`, `#d94b35`, `#18865f` | `#17694b`, `#6339b8`, `#b32a17`, `#146448` |
+| Required marker, choice chips | `#d13b25`, `#61798a` | `#b32a17`, `#4a6071` |
+
+**Test results.** `npm run check:contrast` ([scripts/check-contrast.mjs](scripts/check-contrast.mjs))
+computes WCAG relative-luminance ratios for every text color/background pair
+declared in the stylesheet (inherited backgrounds are checked against white,
+the page color, or the navy sidebar). Before: 96 flagged pairs (some false
+positives from conservative background assumptions). After: **all checked pairs
+meet 4.5:1**. Rerun DevTools' Accessibility contrast checks on each screen
+(Dashboard, Appointments, Medications, Messages, Settings, dialogs, popovers)
+to confirm manually. The one failing unit test
+(`requests an appointment and shows the new visit`) fails identically without
+these changes and is unrelated.
+
+## Accessibility audit (axe-core / DevTools engine)
+
+**Method.** The renderer was served with Vite and opened in Chromium (the
+Electron preload bridge `window.careConnectDesktop` was stubbed, since it is
+absent outside Electron). axe-core 4.11 — the engine behind DevTools/Lighthouse
+accessibility checks — was run with the `wcag2a`, `wcag2aa`, `wcag21a`,
+`wcag21aa` and `best-practice` rule sets on all 8 screens (Dashboard,
+Appointments, Medications, Add medication, Messages, Health records, Care team,
+Preferences) and on the dialogs (appointment, message, help), notification and
+profile menus, and search results. The DevTools Accessibility tree was also
+reviewed manually for accessible names and structure.
+
+| # | Issue | Where | Remediation |
+|---|---|---|---|
+| 1 | `heading-order` (moderate): appointment cards used `<h3>` directly under the page `<h1>`, skipping a level | Appointments | Cards now use `<h2>` (`.appointment-card h2` keeps the same look) |
+| 2 | Section headings read as "1 Medication details" because the decorative step number was part of the heading name | Add medication | Number `<span>` is `aria-hidden` |
+| 3 | Form progress steps were unstructured `<span>`s with no state for assistive tech | Add medication | Now an `<ol aria-label="Medication form progress">` with `<li>`s, `aria-current="step"` on the current step and visually hidden "(completed)" / "(current step)" text |
+| 4 | Landmarks, search input/results, tab list, toast region and popup buttons lacked names/state | App shell | Added `aria-label`s, `aria-haspopup`/`aria-expanded` on menu buttons, `role="status"` on toasts, `aria-hidden` on decorative dot/avatar |
+| 5 | Low text contrast | All screens | See "Color contrast" above |
+
+**Test results.**
+
+| Screen / state | Before | After |
+|---|---|---|
+| Dashboard, Medications, Messages, Health records, Care team, Preferences | 0 violations | 0 violations |
+| Appointments | 1 (`heading-order`) | 0 |
+| Add medication | 0 (manual findings #2, #3) | 0 |
+| Dialogs, menus, search results | 0 | not re-run (unchanged) |
+
+Color contrast is covered by axe's `color-contrast` rule plus
+`npm run check:contrast`. `npx tsc --noEmit` is clean; the unit suite still has
+the single pre-existing, unrelated failure. Automated tools catch only part of
+the WCAG criteria, so the manual keyboard / NVDA / High Contrast checks above
+remain required. To reproduce: run
+`npx vite --config vite.renderer.config.ts`, open the page with the bridge
+stubbed, inject `node_modules/axe-core/axe.min.js`, and call `axe.run()`.
+
+### WCAG 2.1 Level AA verification
+
+axe-core was re-run with only the `wcag2a`, `wcag2aa`, `wcag21a` and
+`wcag21aa` tags on all 6 sidebar pages, Preferences, the Add medication page,
+the appointment/message/help dialogs, and the card, notification and profile
+menus, at both 1280px and 320px wide (the 1.4.10 reflow width). Criteria axe
+cannot test automatically were probed by hand in the browser.
+
+| Criterion | Finding | Remediation |
+|---|---|---|
+| 1.4.3 Contrast (Minimum) | Fixed earlier (see Color contrast) | `npm run check:contrast` passes |
+| 1.4.11 Non-text Contrast | Input/select/textarea borders (`#b9cbd7`, 1.7:1), search box border (1.2:1), unchecked choice chips and secondary-button borders were below 3:1; the yellow focus ring was 1.5–1.6:1 on light backgrounds | Control borders are now `#6b8190` (≥3.7:1). Focus is a 3px yellow outline plus a 3px dark `#1b2a38` ring, which reaches ≥3:1 on both the light page and the navy sidebar. Applied to buttons, inputs, selects, textareas, links, choice chips and the search box |
+| 2.4.7 Focus Visible | The search input had `outline:0` and no replacement indicator | `.search-box:focus-within` now shows the focus ring (also on the 320px layout) |
+| 2.1.1 Keyboard / 2.1.2 No Keyboard Trap | Escape did not close dialogs in automated testing (native `cancel` never fired) | `Dialog` now handles `Escape` explicitly; verified at both widths |
+| 2.1.1 Keyboard (scrollable region) | axe `scrollable-region-focusable`: the dialog body scrolls at 320px but could not be focused | `.dialog-body` is focusable (`tabIndex=0`, `role="group"` labelled by the dialog title) |
+| 4.1.2 Name, Role, Value / 2.5.3 Label in Name | At ≤680px the sidebar label text was `display:none`, so Medications and Messages were announced as just "2" (the badge) | Labels are now visually hidden instead of removed, so names stay "Medications 2" / "Messages 2" |
+| 1.4.10 Reflow | At 320px, appointment cards overflowed 1px (grid `1fr`), card actions overflowed 3px, and the visually hidden radio inputs on Add medication made the page scroll horizontally by 211px | Grid uses `minmax(0,1fr)`, card actions wrap, and `.choice` radios are sized 1px inside a positioned label. No horizontal page scroll remains on any screen |
+| 1.4.12 Text Spacing | Applied line-height 1.5, letter-spacing .12em, word-spacing .16em: no clipped or overflowing text | none needed |
+
+**Results (violations / pages and states checked):** 0 violations at 1280px and
+0 at 320px. Before these fixes the same run found 1 `scrollable-region-focusable`
+violation at 320px, plus the manual failures in the table above. `npx tsc
+--noEmit` is clean and the unit suite is unchanged (27 pass; the one
+pre-existing, unrelated failure remains).
+
+**Not covered / still manual.** axe reports a few `incomplete` items it cannot
+decide (`color-contrast` where menus overlap other content, and the "×" remove
+button's `label-content-name-mismatch`; the "×" is a symbol, not text). The
+palette is verified by `npm run check:contrast`. Automated tools cover only a
+subset of WCAG 2.1, so full conformance still depends on the manual checks
+above: keyboard-only walkthrough, NVDA, Windows High Contrast, and 200% text
+resize in the packaged Electron app. This is a verified best effort, not a
+formal conformance claim.
+
 ## Assignment implementation status
 
 The current repository implements Electron main, preload, and renderer process
