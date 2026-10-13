@@ -199,6 +199,7 @@ td small { color:var(--muted); }
 .choice input:focus-visible+span { outline:3px solid var(--focus); outline-offset:0; box-shadow:0 0 0 6px #1b2a38; }
 .field-grid { display:grid; grid-template-columns:1fr auto; gap:.65rem; }
 .time-chip { display:inline-flex; align-items:center; gap:.35rem; padding:.4rem .65rem; color:#176e9b; background:#e8f4fd; border-radius:999px; font-size:.65rem; font-weight:700; }
+.time-chip select { padding:0; color:inherit; background:transparent; border:0; font:inherit; cursor:pointer; }
 .time-chip button { padding:0; border:0; background:transparent; cursor:pointer; }
 .sticky-form-footer { position:sticky; z-index:5; bottom:0; display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.7rem 2rem; background:rgba(255,255,255,.96); border-top:1px solid var(--border); }
 .sticky-form-footer>span { display:flex; align-items:center; gap:.4rem; color:var(--muted); font-size:.62rem; }
