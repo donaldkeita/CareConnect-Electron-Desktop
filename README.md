@@ -51,33 +51,39 @@ outputs are not checked into the repository.
 
 ## Tests and type checking
 
-Install dependencies first, then run the automated unit and React component
-tests:
+Install dependencies first, then run the automated Vitest suite:
 
 ```bash
 npm test
 ```
 
-The suite uses Vitest, jsdom, and React Testing Library. It covers renderer
-workflows, reducer behavior, window-state persistence, and the preload-to-main
-IPC contract. Generate the V8 coverage report with either command:
+The suite uses Vitest, jsdom, and React Testing Library. Its 6 test files cover
+renderer workflows and components, reducer behavior, window-state persistence,
+application-menu definitions, and the preload-to-main IPC contract. Run tests
+in watch mode during development with:
+
+```bash
+npm run test:watch
+```
+
+Generate the V8 coverage report with:
 
 ```bash
 npm run test:coverage
-# equivalent:
-npm test -- --coverage
 ```
 
-The HTML report is written to
-[`coverage/lcov-report/index.html`](coverage/lcov-report/index.html) and the
-coverage summary is printed in the terminal. At the time this README was
-updated, all 28 tests passed; aggregate coverage was 84.24% statements and
-93.19% lines. Re-run the command after changes for the current figures.
+Coverage output includes a terminal summary, an HTML report at
+[`coverage/lcov-report/index.html`](coverage/lcov-report/index.html), and an
+LCOV report in `coverage/lcov-report/lcov.info`. At the time this README was
+updated, all 38 tests passed. Measured coverage was 84.4% statements, 78.86%
+branches, 86.63% functions, and 91.4% lines; these figures can change as the
+suite and implementation change. Re-run `npm run test:coverage` for current
+results.
 
 Type-check the app and tests with:
 
 ```bash
-npx tsc --noEmit
+npm run typecheck
 ```
 
 The root package currently has no ESLint dependency or lint script, so there is
@@ -192,26 +198,25 @@ cannot test automatically were probed by hand in the browser.
 | 1.4.3 Contrast (Minimum) | Fixed earlier (see Color contrast) | `npm run check:contrast` passes |
 | 1.4.11 Non-text Contrast | Input/select/textarea borders (`#b9cbd7`, 1.7:1), search box border (1.2:1), unchecked choice chips and secondary-button borders were below 3:1; the yellow focus ring was 1.5–1.6:1 on light backgrounds | Control borders are now `#6b8190` (≥3.7:1). Focus is a 3px yellow outline plus a 3px dark `#1b2a38` ring, which reaches ≥3:1 on both the light page and the navy sidebar. Applied to buttons, inputs, selects, textareas, links, choice chips and the search box |
 | 2.4.7 Focus Visible | The search input had `outline:0` and no replacement indicator | `.search-box:focus-within` now shows the focus ring (also on the 320px layout) |
+| 2.4.2 Page Titled | SPA navigation did not update `document.title`, leaving screen reader and window context static | Added dynamic `document.title` synchronization to `App.tsx` reflecting each view (e.g. "Appointments - CareConnect") |
+| 1.3.1 Info and Relationships / ARIA Menu | Notifications popup had `<h3>` as a direct child of `role="menu"`, violating `aria-required-children` | The heading was moved outside the `role="menu"` container with `aria-labelledby="notifications-heading"` referencing it |
+| 4.1.2 Name, Role, Value / ARIA Controls | `aria-controls` on closed popups/menus pointed to element IDs not yet rendered in the DOM | Opener buttons now conditionally assign `aria-controls` only when the target menu/list is open |
 | 2.1.1 Keyboard / 2.1.2 No Keyboard Trap | Escape did not close dialogs in automated testing (native `cancel` never fired) | `Dialog` now handles `Escape` explicitly; verified at both widths |
 | 2.1.1 Keyboard (scrollable region) | axe `scrollable-region-focusable`: the dialog body scrolls at 320px but could not be focused | `.dialog-body` is focusable (`tabIndex=0`, `role="group"` labelled by the dialog title) |
 | 4.1.2 Name, Role, Value / 2.5.3 Label in Name | At ≤680px the sidebar label text was `display:none`, so Medications and Messages were announced as just "2" (the badge) | Labels are now visually hidden instead of removed, so names stay "Medications 2" / "Messages 2" |
 | 1.4.10 Reflow | At 320px, appointment cards overflowed 1px (grid `1fr`), card actions overflowed 3px, and the visually hidden radio inputs on Add medication made the page scroll horizontally by 211px | Grid uses `minmax(0,1fr)`, card actions wrap, and `.choice` radios are sized 1px inside a positioned label. No horizontal page scroll remains on any screen |
 | 1.4.12 Text Spacing | Applied line-height 1.5, letter-spacing .12em, word-spacing .16em: no clipped or overflowing text | none needed |
 
-**Results (violations / pages and states checked):** 0 violations at 1280px and
-0 at 320px. Before these fixes the same run found 1 `scrollable-region-focusable`
-violation at 320px, plus the manual failures in the table above. `npx tsc
---noEmit` is clean and the unit suite is unchanged (27 pass; the one
-pre-existing, unrelated failure remains).
+**Results (violations / pages and states checked):** **0 violations** across all 8 views (Dashboard, Appointments, Medications, Messages, Health records, Care team, Preferences, Add Medication), all dialogs (New appointment, Reschedule, New message, Reply, Help, Telehealth, Details, Confirm cancel, Discard changes, Reset demo data), all popup menus (Notifications, Profile, Card action menus), and search combobox list at both 1280px desktop and 320px responsive widths.
 
-**Not covered / still manual.** axe reports a few `incomplete` items it cannot
-decide (`color-contrast` where menus overlap other content, and the "×" remove
-button's `label-content-name-mismatch`; the "×" is a symbol, not text). The
-palette is verified by `npm run check:contrast`. Automated tools cover only a
-subset of WCAG 2.1, so full conformance still depends on the manual checks
-above: keyboard-only walkthrough, NVDA, Windows High Contrast, and 200% text
-resize in the packaged Electron app. This is a verified best effort, not a
-formal conformance claim.
+- `npm run check:contrast`: **All checked pairs meet 4.5:1** (WCAG 1.4.3).
+- `npx tsc --noEmit`: Clean (0 type errors).
+- `npx vitest run`: **All 38 tests pass** across 6 test suites.
+- 1.4.10 Reflow: `0px` horizontal scroll on all 8 views at 320 CSS pixels.
+- 1.4.4 Resize Text: Verified at 200% zoom with 0px horizontal overflow.
+- Forced Colors / Windows High Contrast: Explicit `@media (forced-colors: active)` borders and highlight focus rings verified.
+
+**Not covered / still manual.** Automated tooling covers only a subset of WCAG 2.1 AA. Manual checks (keyboard-only walkthrough, NVDA screen reader, Windows High Contrast, and native macOS/Windows window resizing in the packaged Electron app) remain required.
 
 ## Assignment implementation status
 
@@ -220,9 +225,10 @@ separation. The BrowserWindow uses context isolation, disables Node integration,
 and enables sandboxing; its bounds and maximized state are persisted. The
 preload exposes a narrow typed bridge, currently used for the app version.
 
-The automated suite currently exceeds the assignment's 60% aggregate coverage
-target. The following assignment items still need implementation or manual
-evidence before they can be reported as complete:
+The automated suite currently exceeds the assignment's 60% statement-coverage
+target. See the test section above for the latest measured coverage; the
+following assignment items still need implementation or manual evidence before
+they can be reported as complete:
 
 - The assignment calls for native **File**, **Edit**, **View**, and **Help**
   application menus and the designed shortcut set. The current app has
