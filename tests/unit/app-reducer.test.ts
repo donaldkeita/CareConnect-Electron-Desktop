@@ -22,6 +22,14 @@ describe("CareConnect application state", () => {
     expect(result.page).toBe("medications");
   });
 
+  it("marks and unmarks an individual medication dose", () => {
+    const doseKey = "2026-10-10|08:00";
+    const taken = appReducer(initialState, { type: "toggle-medication-dose", id: 1, doseKey });
+    expect(taken.medications.find((item) => item.id === 1)?.takenDoses).toContain(doseKey);
+    const undone = appReducer(taken, { type: "toggle-medication-dose", id: 1, doseKey });
+    expect(undone.medications.find((item) => item.id === 1)?.takenDoses).not.toContain(doseKey);
+  });
+
   it("marks selected messages read and appends replies", () => {
     const read = appReducer(initialState, { type: "select-message", id: 1 });
     expect(read.messages.find((item) => item.id === 1)?.unread).toBe(false);
